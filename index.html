@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Verdana', sans-serif;
+        }
+
+        body {
+            background: #1d1f27;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(135deg, #005eff, #6a82e7);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .search {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search input {
+            width: 75%;
+            padding: 15px;
+            border-radius: 30px;
+            border: none;
+            margin-right: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .search button {
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        .search button img {
+            width: 20px;
+        }
+
+        .weather img {
+            width: 100px;
+            margin-top: 20px;
+        }
+
+        .weather h1 {
+            font-size: 60px;
+            margin-top: 20px;
+        }
+
+        .weather h2 {
+            font-size: 30px;
+            margin-top: 10px;
+        }
+
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .col {
+            text-align: center;
+        }
+
+        .humidity, .wind {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+
+            .search input {
+                width: 70%;
+            }
+
+            .weather h1 {
+                font-size: 40px;
+            }
+
+            .weather h2 {
+                font-size: 24px;
+            }
+
+            .details .humidity, .details .wind {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter your City Name" spellcheck="false" id="in">
+            <button id="btn"><img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="search"></button>
+
+        </div>
+        <div class="weather">
+            <img id="weather-icon" src="https://openweathermap.org/img/wn/10d@2x.png" class="weather-icon" alt="Weather Icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">Kanpur</h2>
+            <div class="details">
+                <div class="col">
+                    <p>Humidity</p>
+                    <p class="humidity">50%</p>
+                </div>
+                <div class="col">
+                    <p>Wind Speed</p>
+                    <p class="wind">5 km</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let inp = document.getElementById("in");
+        let btn = document.getElementById("btn");
+
+        inp.addEventListener("keydown", async (e) => {
+            if (e.key === "Enter") {
+                let city = inp.value;
+                inp.value = "";
+                await fetchWeatherData(city);
+            }
+        });
+
+        btn.addEventListener("click", async () => {
+            let city = inp.value;
+            inp.value = "";
+            await fetchWeatherData(city);
+        });
+
+        async function fetchWeatherData(city) {
+            try {
+                let response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=3ad010f6413abec4fc52fa28e71bccdf`);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                let data = await response.json();
+
+                if (data.weather && data.weather.length > 0) {
+                    let iconCode = data.weather[0].icon;
+                    let iconUrl = `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+                    document.getElementById('weather-icon').src = iconUrl;
+
+                    let cityElement = document.querySelector(".city");
+                    cityElement.textContent = data.name;
+
+                    let tempElement = document.querySelector(".temp");
+                    let tempCelsius = (data.main.temp - 273.15).toFixed(0);
+                    tempElement.textContent = `${tempCelsius}°C`;
+
+                    let windElement = document.querySelector(".wind");
+                    windElement.textContent = `${data.wind.speed} Km/h`;
+
+                    let humidityElement = document.querySelector(".humidity");
+                    humidityElement.textContent = `${data.main.humidity}%`;
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
